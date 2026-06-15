@@ -5,12 +5,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Input } from '../src/components/ui/Input';
 import { Button } from '../src/components/ui/Button';
+import { SuccessModal } from '../src/components/ui/SuccessModal';
 import { apiClient } from '../src/api/client';
 
 export default function JoinGroup() {
    const router = useRouter();
    const [loading, setLoading] = useState(false);
    const [groupId, setGroupId] = useState('');
+   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
    const handleJoin = async () => {
       if (!groupId) {
@@ -20,8 +22,7 @@ export default function JoinGroup() {
       setLoading(true);
       try {
          await apiClient.post(`/groups/${groupId}/join/`);
-         Alert.alert('Success', 'You have successfully joined the Njangi!');
-         router.replace('/dashboard');
+         setSuccessModalVisible(true);
       } catch (err: any) {
          Alert.alert('Join Failed', err.response?.data?.error || err.message || 'Could not join group');
       } finally {
@@ -64,6 +65,15 @@ export default function JoinGroup() {
          <View className="p-6 pt-2">
             <Button title="Join Group" onPress={handleJoin} loading={loading} />
          </View>
+
+         <SuccessModal
+            visible={successModalVisible}
+            message="You have successfully joined the Njangi group!"
+            onClose={() => {
+               setSuccessModalVisible(false);
+               router.replace('/dashboard');
+            }}
+         />
       </SafeAreaView>
    );
 }

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Input } from '../src/components/ui/Input';
 import { Button } from '../src/components/ui/Button';
+import { SuccessModal } from '../src/components/ui/SuccessModal';
 import { apiClient } from '../src/api/client';
 
 export default function CreateGroup() {
@@ -15,6 +16,7 @@ export default function CreateGroup() {
    const [cycleLength, setCycleLength] = useState('12');
    const [frequency, setFrequency] = useState('MONTHLY');
    const [isPrivate, setIsPrivate] = useState(false);
+   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
    const handleCreate = async () => {
       if (!name || !amount) {
@@ -30,8 +32,7 @@ export default function CreateGroup() {
             frequency,
             is_private: isPrivate
          });
-         Alert.alert('Success', 'Njangi Cycle Created successfully!');
-         router.replace('/dashboard');
+         setSuccessModalVisible(true);
       } catch (err: any) {
          Alert.alert('Creation Failed', err.message);
       } finally {
@@ -127,6 +128,15 @@ export default function CreateGroup() {
          <View className="p-6 pt-2">
             <Button title="Create Group" onPress={handleCreate} loading={loading} />
          </View>
+
+         <SuccessModal
+            visible={successModalVisible}
+            message="You have successfully created the Njangi group!"
+            onClose={() => {
+               setSuccessModalVisible(false);
+               router.replace('/dashboard');
+            }}
+         />
       </SafeAreaView>
    );
 }
