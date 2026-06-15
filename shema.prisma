@@ -1,0 +1,344 @@
+CREATE TABLE UserManager (
+    Userid  PRIMARY KEY,
+    email VARCHAR(254) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE,
+    full_name VARCHAR(255),
+    phone_number VARCHAR(15) UNIQUE,
+    google_uid VARCHAR(100) UNIQUE,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    referral_bonus DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_staff BOOLEAN NOT NULL DEFAULT FALSE,
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
+
+    password VARCHAR(128) NOT NULL,
+
+    last_login TIMESTAMP NULL,
+
+    date_joined TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_cameroon_phone
+        CHECK (
+            phone_number IS NULL
+            OR phone_number ~ '^\+2376[0-9]{8}$'
+        )
+);
+
+
+CREATE TABLE users_otp (
+    id BIGSERIAL PRIMARY KEY,
+
+    user_id BIGINT NULL,
+
+    phone_number VARCHAR(15) NOT NULL,
+
+    code VARCHAR(4) NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    expires_at TIMESTAMP NOT NULL,
+
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_otp_user
+        FOREIGN KEY (user_id)
+        REFERENCES users_user(id)
+        ON DELETE CASCADE
+);
+
+
+CREATE INDEX idx_user_email
+ON users_user(email);
+
+CREATE INDEX idx_user_phone
+ON users_user(phone_number);
+
+CREATE INDEX idx_otp_user
+ON users_otp(user_id);
+
+CREATE INDEX idx_otp_phone
+ON users_otp(phone_number);
+
+CREATE INDEX idx_otp_expiry
+ON users_otp(expires_at);
+
+
+CREATE TABLE users_user_groups (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    group_id BIGINT NOT NULL,
+
+    FOREIGN KEY (user_id)
+      REFERENCES users_user(id)
+      ON DELETE CASCADE,
+
+    FOREIGN KEY (group_id)
+      REFERENCES auth_group(id)
+      ON DELETE CASCADE,
+
+    UNIQUE(user_id, group_id)
+);
+
+
+CREATE TABLE users_user_user_permissions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    permission_id BIGINT NOT NULL,
+
+    FOREIGN KEY (user_id)
+      REFERENCES users_user(id)
+      ON DELETE CASCADE,
+
+    FOREIGN KEY (permission_id)
+      REFERENCES auth_permission(id)
+      ON DELETE CASCADE,
+
+    UNIQUE(user_id, permission_id)
+);
+
+CREATE TABLE njangi_group (
+    id BIGSERIAL PRIMARY KEY,
+
+    name VARCHAR(100) NOT NULL,
+
+    contribution_amount DECIMAL(10,2) NOT NULL,
+
+    cycle_length INTEGER NOT NULL,
+
+    frequency VARCHAR(10) NOT NULL
+        CHECK (frequency IN ('WEEKLY','MONTHLY')),
+
+    is_private BOOLEAN DEFAULT FALSE,
+
+    invite_code VARCHAR(20) UNIQUE,
+    
+    admin_id BIGINT NULL,
+
+    description TEXT,
+
+    rules TEXT,
+
+    current_cycle_number INTEGER DEFAULT 1,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_group_admin
+      FOREIGN KEY (admin_id)
+      REFERENCES users_user(id)
+      ON DELETE SET NULL
+);
+
+CREATE INDEX idx_invite_code
+ON njangi_group(invite_code);
+
+CREATE TABLE group_pool (
+    id BIGSERIAL PRIMARY KEY,
+
+    group_id BIGINT UNIQUE NOT NULL,
+
+    balance DECIMAL(12,2) DEFAULT 0.00,
+
+    CONSTRAINT fk_pool_group
+       FOREIGN KEY (group_id)
+       REFERENCES njangi_group(id)
+       ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE membership (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    group_id BIGINT NOT NULL,
+
+    user_id BIGINT NOT NULL,
+
+    payout_order INTEGER NOT NULL,
+
+    role VARCHAR(10)
+       DEFAULT 'MEMBER'
+       CHECK (role IN ('MEMBER','ADMIN')),
+
+    status VARCHAR(20)
+       DEFAULT 'ACTIVE'
+       CHECK (
+          status IN (
+            'ACTIVE',
+            'PENDING_NEXT_CYCLE',
+            'REMOVED'
+          )
+       ),
+
+    cycle_start_index INTEGER DEFAULT 1,
+
+    join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_membership_group
+      FOREIGN KEY (group_id)
+      REFERENCES njangi_group(id)
+      ON DELETE CASCADE,
+
+    CONSTRAINT fk_membership_user
+      FOREIGN KEY (user_id)
+      REFERENCES users_user(id)
+      ON DELETE CASCADE,
+
+    CONSTRAINT unique_group_user
+      UNIQUE (group_id, user_id)
+);
+
+
+CREATE TABLE contribution (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    membership_id BIGINT NOT NULL,
+
+    amount DECIMAL(10,2) NOT NULL,
+
+    date_paid TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    is_late BOOLEAN DEFAULT FALSE,
+
+    cycle_number INTEGER NOT NULL,
+
+    payment_method VARCHAR(10)
+       DEFAULT 'WALLET'
+       CHECK (
+         payment_method IN (
+            'MOMO',
+            'BANK',
+            'WALLET'
+         )
+       ),
+
+    is_verified BOOLEAN DEFAULT FALSE,
+
+    CONSTRAINT fk_contribution_membership
+      FOREIGN KEY (membership_id)
+      REFERENCES membership(id)
+      ON DELETE CASCADE
+);
+
+
+CREATE TABLE payout (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    membership_id BIGINT NOT NULL,
+
+    total_amount DECIMAL(12,2) NOT NULL,
+
+    available_amount DECIMAL(12,2) NOT NULL,
+
+    locked_amount DECIMAL(12,2) NOT NULL,
+
+    date_disbursed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    cycle_number INTEGER NOT NULL,
+
+    CONSTRAINT fk_payout_membership
+      FOREIGN KEY (membership_id)
+      REFERENCES membership(id)
+      ON DELETE CASCADE
+);
+
+CREATE TABLE loan_request (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    group_id BIGINT NOT NULL,
+
+    requester_id BIGINT NOT NULL,
+
+    amount DECIMAL(12,2) NOT NULL,
+
+    status VARCHAR(20)
+        DEFAULT 'PENDING'
+        CHECK (
+            status IN (
+                'PENDING',
+                'APPROVED',
+                'REJECTED',
+                'REPAID'
+            )
+        ),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    votes_for INTEGER DEFAULT 0,
+
+    votes_against INTEGER DEFAULT 0,
+
+    CONSTRAINT fk_loan_group
+        FOREIGN KEY (group_id)
+        REFERENCES njangi_group(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_loan_requester
+        FOREIGN KEY (requester_id)
+        REFERENCES membership(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE trust_score (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    user_id BIGINT UNIQUE NOT NULL,
+
+    score INTEGER DEFAULT 100,
+
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_trustscore_user
+        FOREIGN KEY (user_id)
+        REFERENCES users_user(id)
+)
+CREATE TABLE wallet (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    user_id BIGINT UNIQUE NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_wallet_user
+       FOREIGN KEY (user_id)
+       REFERENCES users_user(id)
+       ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE transaction (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    wallet_id BIGINT NOT NULL,
+
+    amount DECIMAL(12,2) NOT NULL,
+
+    transaction_type VARCHAR(20) NOT NULL
+      CHECK (
+        transaction_type IN (
+          'DEPOSIT',
+          'WITHDRAW',
+          'CONTRIBUTION',
+          'PAYOUT_AVAILABLE',
+          'PAYOUT_LOCKED',
+          'LOAN_DISBURSEMENT',
+          'LOAN_REPAYMENT'
+        )
+      ),
+
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    description VARCHAR(255),
+
+    CONSTRAINT fk_transaction_wallet
+      FOREIGN KEY (wallet_id)
+      REFERENCES wallet(id)
+      ON DELETE CASCADE
+);

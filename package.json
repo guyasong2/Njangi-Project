@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "dotenv-flow": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "react-native-dotenv": "^3.4.11"
+  }
+}
