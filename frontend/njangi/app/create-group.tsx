@@ -131,7 +131,7 @@ export default function CreateGroup() {
 
          <SuccessModal
             visible={successModalVisible}
-            message="You have successfully created the Njangi group!"
+            message={`You have successfully created ${name || 'the Njangi group'}!`}
             onClose={() => {
                setSuccessModalVisible(false);
                router.replace('/dashboard');

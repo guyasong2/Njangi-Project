@@ -54,7 +54,8 @@ class NjangiGroupViewSet(viewsets.ModelViewSet):
             membership = GroupService.join_group(pk, request.user, invite_code=invite_code)
             return Response({
                 "message": "You have successfully joined via the secure registry.",
-                "status": membership.status
+                "status": membership.status,
+                "group_name": membership.group.name
             }, status=status.HTTP_201_CREATED)
         except PermissionError as e:
             return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)

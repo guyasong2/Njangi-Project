@@ -13,6 +13,7 @@ export default function JoinGroup() {
    const [loading, setLoading] = useState(false);
    const [groupId, setGroupId] = useState('');
    const [successModalVisible, setSuccessModalVisible] = useState(false);
+   const [successMessage, setSuccessMessage] = useState('');
 
    const handleJoin = async () => {
       if (!groupId) {
@@ -21,7 +22,9 @@ export default function JoinGroup() {
       }
       setLoading(true);
       try {
-         await apiClient.post(`/groups/${groupId}/join/`);
+         const response = await apiClient.post(`/groups/${groupId}/join/`);
+         const groupName = response.data?.group_name || 'the Njangi group';
+         setSuccessMessage(`You have successfully joined ${groupName}!`);
          setSuccessModalVisible(true);
       } catch (err: any) {
          Alert.alert('Join Failed', err.response?.data?.error || err.message || 'Could not join group');
@@ -68,7 +71,7 @@ export default function JoinGroup() {
 
          <SuccessModal
             visible={successModalVisible}
-            message="You have successfully joined the Njangi group!"
+            message={successMessage}
             onClose={() => {
                setSuccessModalVisible(false);
                router.replace('/dashboard');
