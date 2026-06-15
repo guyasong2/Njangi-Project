@@ -56,7 +56,13 @@ export default function Notifications() {
       <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F1E8' }}>
          <View className="flex-row items-center px-6 py-4 border-b border-[#EAE5D9]">
             <TouchableOpacity 
-               onPress={() => router.back()} 
+               onPress={() => {
+                  if (router.canGoBack()) {
+                     router.back();
+                  } else {
+                     router.replace('/dashboard');
+                  }
+               }} 
                className="w-10 h-10 rounded-[20px] bg-[#EAE5D9] items-center justify-center"
             >
                <Ionicons name="arrow-back" size={20} color="#0B3D2E" />
