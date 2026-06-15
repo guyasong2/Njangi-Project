@@ -1,0 +1,40 @@
+
+> njangi@1.0.0 lint
+> expo lint
+
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/_layout.tsx
+   5:8   warning  '/home/reconraven/Documents/Njangi/frontend/njangi/node_modules/react-native-reanimated/lib/module/index.js' imported multiple times  import/no-duplicates
+  11:1   warning  Import in body of module; reorder to top                                                                                              import/first
+  12:1   warning  Import in body of module; reorder to top                                                                                              import/first
+  13:1   warning  Import in body of module; reorder to top                                                                                              import/first
+  14:1   warning  Import in body of module; reorder to top                                                                                              import/first
+  16:1   warning  Import in body of module; reorder to top                                                                                              import/first
+  16:37  warning  'Layout' is defined but never used                                                                                                    @typescript-eslint/no-unused-vars
+  16:51  warning  '/home/reconraven/Documents/Njangi/frontend/njangi/node_modules/react-native-reanimated/lib/module/index.js' imported multiple times  import/no-duplicates
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/create-group.tsx
+  26:14  warning  'response' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/login.tsx
+   1:20  warning  'useRef' is defined but never used                               @typescript-eslint/no-unused-vars
+  65:55  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/onboarding.tsx
+  1:29  warning  'TouchableOpacity' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/profile.tsx
+  12:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/signup.tsx
+  1:20  warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/verify-otp.tsx
+  22:9  warning  'pendingCredentials' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/reconraven/Documents/Njangi/frontend/njangi/app/wallet.tsx
+  4:10  warning  'useRouter' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 16 problems (1 error, 15 warnings)
+  0 errors and 6 warnings potentially fixable with the `--fix` option.
+
