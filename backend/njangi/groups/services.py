@@ -14,7 +14,14 @@ class GroupService:
         Private groups require a valid invite_code.
         """
         # 1. Lock the group row for editing capacity
-        group = NjangiGroup.objects.select_for_update().get(id=group_id)
+        try:
+            if str(group_id).isdigit():
+                group = NjangiGroup.objects.select_for_update().get(id=int(group_id))
+            else:
+                group = NjangiGroup.objects.select_for_update().get(invite_code=group_id)
+                invite_code = group_id
+        except NjangiGroup.DoesNotExist:
+            raise ValidationError("Group not found. Please check the invite code or ID.")
         
         # 2. Privacy & Invite Code Check
         if group.is_private:
