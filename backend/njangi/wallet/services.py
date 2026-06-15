@@ -30,6 +30,15 @@ class WalletService:
             description=description
         )
         
+        if transaction_type == 'DEPOSIT':
+            from notifications.models import Notification
+            Notification.objects.create(
+                user=user,
+                title="Deposit Successful",
+                message=f"You have successfully deposited {amount} XAF into your wallet.",
+                type='DEPOSIT'
+            )
+        
         logger.info(f"Wallet transaction recorded: {txn}")
         return txn
 

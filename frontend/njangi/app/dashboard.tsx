@@ -78,7 +78,9 @@ export default function Dashboard() {
            </TouchableOpacity>
            <Text className="text-xl font-extrabold text-njangi-green tracking-tight">Njangi</Text>
            <TouchableOpacity>
-             <Ionicons name="notifications-outline" size={24} color="#0B3D2E" />
+            <TouchableOpacity onPress={() => router.push('/notifications')} className="relative">
+               <Ionicons name="notifications-outline" size={24} color="#0B3D2E" />
+            </TouchableOpacity>
            </TouchableOpacity>
         </View>
 

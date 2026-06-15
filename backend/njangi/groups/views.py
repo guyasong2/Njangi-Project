@@ -45,6 +45,15 @@ class NjangiGroupViewSet(viewsets.ModelViewSet):
                 user=request.user,
                 payout_order=1
             )
+            
+            from notifications.models import Notification
+            Notification.objects.create(
+                user=request.user,
+                title="Group Created",
+                message=f"You have successfully created the Njangi group '{group.name}'.",
+                type='CREATE'
+            )
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
@@ -52,6 +61,15 @@ class NjangiGroupViewSet(viewsets.ModelViewSet):
         invite_code = request.data.get('invite_code')
         try:
             membership = GroupService.join_group(pk, request.user, invite_code=invite_code)
+            
+            from notifications.models import Notification
+            Notification.objects.create(
+                user=request.user,
+                title="Joined Group",
+                message=f"You have successfully joined the Njangi group '{membership.group.name}'.",
+                type='JOIN'
+            )
+            
             return Response({
                 "message": "You have successfully joined via the secure registry.",
                 "status": membership.status,

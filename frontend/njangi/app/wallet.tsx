@@ -74,7 +74,9 @@ export default function Wallet() {
             </TouchableOpacity>
             <Text className="text-xl font-extrabold text-[#0B3D2E] tracking-tight">Wallet</Text>
             <TouchableOpacity>
-              <Ionicons name="notifications-outline" size={24} color="#0B3D2E" />
+              <TouchableOpacity onPress={() => router.push('/notifications')} className="relative">
+                 <Ionicons name="notifications-outline" size={24} color="#0B3D2E" />
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
 
