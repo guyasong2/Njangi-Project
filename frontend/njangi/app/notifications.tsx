@@ -14,7 +14,8 @@ export default function Notifications() {
    const fetchNotifications = async () => {
       try {
          const res = await apiClient.get('/notifications/');
-         setNotifications(res.data);
+         const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+         setNotifications(data);
       } catch (err) {
          console.error('Failed to fetch notifications', err);
       } finally {
@@ -69,13 +70,13 @@ export default function Notifications() {
          >
             {loading ? (
                <Text className="text-center mt-10 text-[#A09C90]">Loading...</Text>
-            ) : notifications.length === 0 ? (
+            ) : (!notifications || notifications.length === 0) ? (
                <View className="items-center justify-center mt-20">
                   <Ionicons name="notifications-off-outline" size={64} color="#A09C90" />
                   <Text className="text-[#A09C90] mt-4 font-bold">No notifications yet</Text>
                </View>
             ) : (
-               notifications.map(notif => (
+               (notifications || []).map(notif => (
                   <TouchableOpacity 
                      key={notif.id} 
                      onPress={() => markAsRead(notif.id)}
